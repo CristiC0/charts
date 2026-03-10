@@ -17,29 +17,26 @@ onMounted(async () => {
   }
 })
 
-// --- Chart 1 & 2: Evaluare + Reevaluare ---
+const monthLabels = {
+  ian25: 'Ianuarie 2025',
+  ian26: 'Ianuarie 2026',
+  feb25: 'Februarie 2025',
+  feb26: 'Februarie 2026',
+}
+
+// --- Chart 1 & 2: Evaluare + Reevaluare (totals only) ---
 const evalReevalStacks = (year1Label, year2Label, key1, key2) => [
   { key: key1, label: year1Label },
   { key: key2, label: year2Label },
 ]
 
 const evalReevalSeries = (key1, key2) => [
-  // Year 1 stack — evaluare
-  { key: `${key1}_eval_g`, dataKey: 'eval_gradinita', label: `${key1.toUpperCase()} Eval. grădiniță`, stack: key1, color: '#1565c0' },
-  { key: `${key1}_eval_s`, dataKey: 'eval_scoala', label: `${key1.toUpperCase()} Eval. școală`, stack: key1, color: '#2e7d32' },
-  { key: `${key1}_eval_i`, dataKey: 'eval_ipt', label: `${key1.toUpperCase()} Eval. ÎPT`, stack: key1, color: '#e65100' },
-  // Year 1 stack — reevaluare
-  { key: `${key1}_reeval_g`, dataKey: 'reeval_gradinita', label: `${key1.toUpperCase()} Reeval. grădiniță`, stack: key1, color: '#1976d2' },
-  { key: `${key1}_reeval_s`, dataKey: 'reeval_scoala', label: `${key1.toUpperCase()} Reeval. școală`, stack: key1, color: '#388e3c' },
-  { key: `${key1}_reeval_i`, dataKey: 'reeval_ipt', label: `${key1.toUpperCase()} Reeval. ÎPT`, stack: key1, color: '#f57c00' },
-  // Year 2 stack — evaluare
-  { key: `${key2}_eval_g`, dataKey: 'eval_gradinita', label: `${key2.toUpperCase()} Eval. grădiniță`, stack: key2, color: '#64b5f6' },
-  { key: `${key2}_eval_s`, dataKey: 'eval_scoala', label: `${key2.toUpperCase()} Eval. școală`, stack: key2, color: '#81c784' },
-  { key: `${key2}_eval_i`, dataKey: 'eval_ipt', label: `${key2.toUpperCase()} Eval. ÎPT`, stack: key2, color: '#ffb74d' },
-  // Year 2 stack — reevaluare
-  { key: `${key2}_reeval_g`, dataKey: 'reeval_gradinita', label: `${key2.toUpperCase()} Reeval. grădiniță`, stack: key2, color: '#90caf9' },
-  { key: `${key2}_reeval_s`, dataKey: 'reeval_scoala', label: `${key2.toUpperCase()} Reeval. școală`, stack: key2, color: '#a5d6a7' },
-  { key: `${key2}_reeval_i`, dataKey: 'reeval_ipt', label: `${key2.toUpperCase()} Reeval. ÎPT`, stack: key2, color: '#ffcc80' },
+  // Year 1 (2025) — lighter colors
+  { key: `${key1}_eval`, dataKey: 'eval_total', label: `${monthLabels[key1]} Evaluare`, stack: key1, color: '#efa579' },
+  { key: `${key1}_reeval`, dataKey: 'reeval_total', label: `${monthLabels[key1]} Reevaluare`, stack: key1, color: '#a8c3e0' },
+  // Year 2 (2026) — darker colors
+  { key: `${key2}_eval`, dataKey: 'eval_total', label: `${monthLabels[key2]} Evaluare`, stack: key2, color: '#e25b29' },
+  { key: `${key2}_reeval`, dataKey: 'reeval_total', label: `${monthLabels[key2]} Reevaluare`, stack: key2, color: '#2762ec' },
 ]
 
 // --- Chart 3 & 4: Asistență ---
@@ -49,17 +46,17 @@ const asistentaStacks = (year1Label, year2Label, key1, key2) => [
 ]
 
 const asistentaSeries = (key1, key2) => [
-  { key: `${key1}_asist`, dataKey: 'asistati', label: `${key1.toUpperCase()} Copii asistați`, stack: key1, color: '#7b1fa2' },
-  { key: `${key1}_sed`, dataKey: 'sedinte', label: `${key1.toUpperCase()} Ședințe`, stack: key1, color: '#c62828' },
-  { key: `${key2}_asist`, dataKey: 'asistati', label: `${key2.toUpperCase()} Copii asistați`, stack: key2, color: '#ba68c8' },
-  { key: `${key2}_sed`, dataKey: 'sedinte', label: `${key2.toUpperCase()} Ședințe`, stack: key2, color: '#ef5350' },
+  // Year 1 (2025) — lighter colors
+  { key: `${key1}_asist`, dataKey: 'asistati', label: `${monthLabels[key1]} Copii asistați`, stack: key1, color: '#efa579' },
+  { key: `${key1}_sed`, dataKey: 'sedinte', label: `${monthLabels[key1]} Ședințe`, stack: key1, color: '#a8c3e0' },
+  // Year 2 (2026) — darker colors
+  { key: `${key2}_asist`, dataKey: 'asistati', label: `${monthLabels[key2]} Copii asistați`, stack: key2, color: '#e25b29' },
+  { key: `${key2}_sed`, dataKey: 'sedinte', label: `${monthLabels[key2]} Ședințe`, stack: key2, color: '#2762ec' },
 ]
 </script>
 
 <template>
   <div class="dashboard">
-    <h1>Diagrame DMSTAO</h1>
-
     <div v-if="loading" class="status">Se încarcă datele...</div>
     <div v-else-if="error" class="status error">Eroare: {{ error }}</div>
 
@@ -89,6 +86,7 @@ const asistentaSeries = (key1, key2) => [
         :stacks="asistentaStacks('Ianuarie 2025', 'Ianuarie 2026', 'ian25', 'ian26')"
         :data="{ ian25: data.ian25, ian26: data.ian26 }"
         y-axis-name="Unități"
+        label-each
       />
 
       <!-- Chart 4: Asistență Februarie 25 vs 26 -->
@@ -98,6 +96,7 @@ const asistentaSeries = (key1, key2) => [
         :stacks="asistentaStacks('Februarie 2025', 'Februarie 2026', 'feb25', 'feb26')"
         :data="{ feb25: data.feb25, feb26: data.feb26 }"
         y-axis-name="Unități"
+        label-each
       />
     </template>
   </div>
@@ -106,12 +105,9 @@ const asistentaSeries = (key1, key2) => [
 <style scoped>
 .dashboard {
   text-align: left;
-}
-.dashboard h1 {
-  text-align: center;
-  color: #1a1a2e;
-  margin-bottom: 32px;
-  font-size: 1.8rem;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px 32px;
 }
 .status {
   text-align: center;
