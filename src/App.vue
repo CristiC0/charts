@@ -24,19 +24,43 @@ const monthLabels = {
   feb26: 'Februarie 2026',
 }
 
-// --- Chart 1 & 2: Evaluare + Reevaluare (totals only) ---
+// --- Chart 1 & 2: Evaluare + Reevaluare ---
 const evalReevalStacks = (year1Label, year2Label, key1, key2) => [
   { key: key1, label: year1Label },
   { key: key2, label: year2Label },
 ]
 
-const evalReevalSeries = (key1, key2) => [
-  // Year 1 (2025) — lighter colors
+// Total view
+const evalReevalSeriesTotals = (key1, key2) => [
   { key: `${key1}_eval`, dataKey: 'eval_total', label: `${monthLabels[key1]} Evaluare`, stack: key1, color: '#efa579' },
   { key: `${key1}_reeval`, dataKey: 'reeval_total', label: `${monthLabels[key1]} Reevaluare`, stack: key1, color: '#a8c3e0' },
-  // Year 2 (2026) — darker colors
   { key: `${key2}_eval`, dataKey: 'eval_total', label: `${monthLabels[key2]} Evaluare`, stack: key2, color: '#e25b29' },
   { key: `${key2}_reeval`, dataKey: 'reeval_total', label: `${monthLabels[key2]} Reevaluare`, stack: key2, color: '#2762ec' },
+]
+
+// Pe trepte view
+const evalReevalSeriesTrepte = (key1, key2) => [
+  // Year 1 — evaluare pe trepte
+  { key: `${key1}_eval_g`, dataKey: 'eval_gradinita', label: `${monthLabels[key1]} Eval. grădiniță`, stack: key1, color: '#f5c6a0' },
+  { key: `${key1}_eval_s`, dataKey: 'eval_scoala', label: `${monthLabels[key1]} Eval. școală`, stack: key1, color: '#efa579' },
+  { key: `${key1}_eval_i`, dataKey: 'eval_ipt', label: `${monthLabels[key1]} Eval. ÎPT`, stack: key1, color: '#e88a4a' },
+  // Year 1 — reevaluare pe trepte
+  { key: `${key1}_reeval_g`, dataKey: 'reeval_gradinita', label: `${monthLabels[key1]} Reeval. grădiniță`, stack: key1, color: '#c8ddf0' },
+  { key: `${key1}_reeval_s`, dataKey: 'reeval_scoala', label: `${monthLabels[key1]} Reeval. școală`, stack: key1, color: '#a8c3e0' },
+  { key: `${key1}_reeval_i`, dataKey: 'reeval_ipt', label: `${monthLabels[key1]} Reeval. ÎPT`, stack: key1, color: '#7fadd4' },
+  // Year 2 — evaluare pe trepte
+  { key: `${key2}_eval_g`, dataKey: 'eval_gradinita', label: `${monthLabels[key2]} Eval. grădiniță`, stack: key2, color: '#f0845a' },
+  { key: `${key2}_eval_s`, dataKey: 'eval_scoala', label: `${monthLabels[key2]} Eval. școală`, stack: key2, color: '#e25b29' },
+  { key: `${key2}_eval_i`, dataKey: 'eval_ipt', label: `${monthLabels[key2]} Eval. ÎPT`, stack: key2, color: '#c44a1e' },
+  // Year 2 — reevaluare pe trepte
+  { key: `${key2}_reeval_g`, dataKey: 'reeval_gradinita', label: `${monthLabels[key2]} Reeval. grădiniță`, stack: key2, color: '#5a9ae0' },
+  { key: `${key2}_reeval_s`, dataKey: 'reeval_scoala', label: `${monthLabels[key2]} Reeval. școală`, stack: key2, color: '#2762ec' },
+  { key: `${key2}_reeval_i`, dataKey: 'reeval_ipt', label: `${monthLabels[key2]} Reeval. ÎPT`, stack: key2, color: '#1a4abf' },
+]
+
+const evalReevalModes = (key1, key2) => [
+  { label: 'Total', series: evalReevalSeriesTotals(key1, key2), labelEach: true },
+  { label: 'Pe trepte de învățământ', series: evalReevalSeriesTrepte(key1, key2), labelEach: true },
 ]
 
 // --- Chart 3 & 4: Asistență ---
@@ -46,10 +70,8 @@ const asistentaStacks = (year1Label, year2Label, key1, key2) => [
 ]
 
 const asistentaSeries = (key1, key2) => [
-  // Year 1 (2025) — lighter colors
   { key: `${key1}_asist`, dataKey: 'asistati', label: `${monthLabels[key1]} Copii asistați`, stack: key1, color: '#efa579' },
   { key: `${key1}_sed`, dataKey: 'sedinte', label: `${monthLabels[key1]} Ședințe`, stack: key1, color: '#a8c3e0' },
-  // Year 2 (2026) — darker colors
   { key: `${key2}_asist`, dataKey: 'asistati', label: `${monthLabels[key2]} Copii asistați`, stack: key2, color: '#e25b29' },
   { key: `${key2}_sed`, dataKey: 'sedinte', label: `${monthLabels[key2]} Ședințe`, stack: key2, color: '#2762ec' },
 ]
@@ -64,7 +86,7 @@ const asistentaSeries = (key1, key2) => [
       <!-- Chart 1: Ianuarie 25 vs 26 — Evaluare + Reevaluare -->
       <GroupedStackedBarChart
         title="Ianuarie 2025 vs Ianuarie 2026 — Evaluare + Reevaluare"
-        :series="evalReevalSeries('ian25', 'ian26')"
+        :modes="evalReevalModes('ian25', 'ian26')"
         :stacks="evalReevalStacks('Ianuarie 2025', 'Ianuarie 2026', 'ian25', 'ian26')"
         :data="{ ian25: data.ian25, ian26: data.ian26 }"
         y-axis-name="Persoane"
@@ -73,7 +95,7 @@ const asistentaSeries = (key1, key2) => [
       <!-- Chart 2: Februarie 25 vs 26 — Evaluare + Reevaluare -->
       <GroupedStackedBarChart
         title="Februarie 2025 vs Februarie 2026 — Evaluare + Reevaluare"
-        :series="evalReevalSeries('feb25', 'feb26')"
+        :modes="evalReevalModes('feb25', 'feb26')"
         :stacks="evalReevalStacks('Februarie 2025', 'Februarie 2026', 'feb25', 'feb26')"
         :data="{ feb25: data.feb25, feb26: data.feb26 }"
         y-axis-name="Persoane"
@@ -107,7 +129,7 @@ const asistentaSeries = (key1, key2) => [
   text-align: left;
   max-width: 100%;
   margin: 0 auto;
-  padding: 20px 32px;
+  padding: 12px;
 }
 .status {
   text-align: center;

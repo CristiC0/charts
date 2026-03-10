@@ -16,6 +16,21 @@ import * as XLSX from 'xlsx'
  * 11: Ședințe
  */
 
+// Normalize diacritics so raion names match across sheets
+// (e.g., "Balti" → "Bălți", "Calarași" → "Călărași")
+const raionNameMap = {
+  'Balti': 'Bălți',
+  'Calarași': 'Călărași',
+  'Cimislia': 'Cimișlia',
+  'Stefan-Vodă': 'Ștefan-Vodă',
+  'Şoldănești': 'Șoldănești',
+}
+
+function normalizeRaion(name) {
+  const trimmed = String(name).trim()
+  return raionNameMap[trimmed] || trimmed
+}
+
 function parseSheet(wb, sheetName) {
   const ws = wb.Sheets[sheetName]
   const raw = XLSX.utils.sheet_to_json(ws, { header: 1 })
@@ -34,7 +49,7 @@ function parseSheet(wb, sheetName) {
     if (!raion || /^total/i.test(String(r[0]).trim())) break
 
     rows.push({
-      raion: String(raion).trim(),
+      raion: normalizeRaion(raion),
       eval_gradinita: Number(r[2]) || 0,
       eval_scoala: Number(r[3]) || 0,
       eval_ipt: Number(r[4]) || 0,

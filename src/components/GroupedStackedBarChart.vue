@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { use } from 'echarts/core'
 import { BarChart } from 'echarts/charts'
 import {
@@ -14,11 +14,26 @@ use([BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]
 
 const props = defineProps({
   title: { type: String, required: true },
-  series: { type: Array, required: true },
+  // Array of { label, series, labelEach? } — if provided, shows a select to switch
+  modes: { type: Array, default: null },
+  // Fallback single series (used when modes is not provided)
+  series: { type: Array, default: () => [] },
   stacks: { type: Array, required: true },
   data: { type: Object, required: true },
   yAxisName: { type: String, default: 'Unități' },
   labelEach: { type: Boolean, default: false },
+})
+
+const selectedMode = ref(0)
+
+const activeSeries = computed(() => {
+  if (props.modes) return props.modes[selectedMode.value].series
+  return props.series
+})
+
+const activeLabelEach = computed(() => {
+  if (props.modes) return props.modes[selectedMode.value].labelEach ?? false
+  return props.labelEach
 })
 
 // Get raion list from the first stack's data
@@ -43,7 +58,7 @@ const dataLookup = computed(() => {
 const seriesTotals = computed(() => {
   const totals = {}
   const lookup = dataLookup.value
-  for (const s of props.series) {
+  for (const s of activeSeries.value) {
     totals[s.key] = raions.value.reduce(
       (sum, r) => sum + (lookup[s.stack]?.[r]?.[s.dataKey] || 0),
       0,
@@ -55,13 +70,14 @@ const seriesTotals = computed(() => {
 const option = computed(() => {
   const lookup = dataLookup.value
   const rList = raions.value
-  const activeSeries = props.series
+  const seriesList = activeSeries.value
+  const isLabelEach = activeLabelEach.value
 
   // Per-stack totals per raion (for top labels)
   const raionStackTotals = {}
   for (const { key: sk } of props.stacks) {
     raionStackTotals[sk] = rList.map((r) =>
-      activeSeries
+      seriesList
         .filter((s) => s.stack === sk)
         .reduce((sum, s) => sum + (lookup[sk]?.[r]?.[s.dataKey] || 0), 0),
     )
@@ -70,13 +86,13 @@ const option = computed(() => {
   // Find last series per stack for top labels
   const lastInStack = {}
   for (const { key: sk } of props.stacks) {
-    lastInStack[sk] = [...activeSeries].reverse().find((s) => s.stack === sk)
+    lastInStack[sk] = [...seriesList].reverse().find((s) => s.stack === sk)
   }
 
-  const series = activeSeries.map((s) => {
+  const series = seriesList.map((s) => {
     const isTopLabel = props.stacks.some((st) => lastInStack[st.key] === s)
 
-    const labelConfig = props.labelEach
+    const labelConfig = isLabelEach
       ? {
           label: {
             show: true,
@@ -115,7 +131,7 @@ const option = computed(() => {
   return {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: {
-      data: activeSeries.map((s) => s.label),
+      data: seriesList.map((s) => s.label),
       bottom: 0,
       type: 'scroll',
     },
@@ -133,7 +149,7 @@ const option = computed(() => {
 // Per-stack summary (each year separately, no grand total)
 const stackSummaries = computed(() => {
   return props.stacks.map(({ key: sk, label }) => {
-    const stackSeries = props.series.filter((s) => s.stack === sk)
+    const stackSeries = activeSeries.value.filter((s) => s.stack === sk)
     const total = stackSeries.reduce((sum, s) => sum + (seriesTotals.value[s.key] || 0), 0)
     const breakdown = stackSeries.map((s) => ({
       label: s.label.replace(/^(Ianuarie|Februarie)\s+\d{4}\s*/i, ''),
@@ -147,8 +163,13 @@ const stackSummaries = computed(() => {
 
 <template>
   <div class="chart-card">
-    <h3 class="chart-title">{{ title }}</h3>
-    <!-- Summary panels: each year stacked vertically -->
+    <div class="chart-header">
+      <h3 class="chart-title">{{ title }}</h3>
+      <select v-if="modes && modes.length > 1" v-model="selectedMode" class="view-select">
+        <option v-for="(m, i) in modes" :key="i" :value="i">{{ m.label }}</option>
+      </select>
+    </div>
+    <!-- Summary panels -->
     <div class="summary-col">
       <div
         v-for="info in stackSummaries"
@@ -157,7 +178,7 @@ const stackSummaries = computed(() => {
       >
         <div class="stack-top">
           <span class="panel-label">{{ info.label }}</span>
-          <span class="panel-value">{{ info.total.toLocaleString('ro-RO') }}</span>
+          <span v-if="!activeLabelEach" class="panel-value">{{ info.total.toLocaleString('ro-RO') }}</span>
         </div>
         <div class="breakdown">
           <span
@@ -179,22 +200,42 @@ const stackSummaries = computed(() => {
 .chart-card {
   background: #fff;
   border-radius: 10px;
-  padding: 24px 28px;
-  margin-bottom: 36px;
+  padding: 12px 12px;
+  margin-bottom: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  max-width: 100%;
-  width: 100%;
+  max-width: 92%;
+  width: 92%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.chart-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 .chart-title {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 1.15rem;
   color: #1a1a2e;
+  flex: 1;
+}
+.view-select {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #f7f8fa;
 }
 .summary-col {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  gap: 12px;
   margin: 0 0 18px;
+}
+.summary-col > .summary-panel {
+  flex: 1;
 }
 .summary-panel {
   background: #f7f8fa;
