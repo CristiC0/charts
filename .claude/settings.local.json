@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx -y xlsx@0.18.5 -e diagrame_DMSTAO.xlsx)"
+    ]
+  }
+}
