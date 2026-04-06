@@ -22,6 +22,8 @@ const monthLabels = {
   ian26: 'Ianuarie 2026',
   feb25: 'Februarie 2025',
   feb26: 'Februarie 2026',
+  mar25: 'Martie 2025',
+  mar26: 'Martie 2026',
 }
 
 // --- Chart 1 & 2: Evaluare + Reevaluare ---
@@ -83,16 +85,16 @@ const asistentaSeries = (key1, key2) => [
     <div v-else-if="error" class="status error">Eroare: {{ error }}</div>
 
     <template v-else>
-      <!-- Chart 1: Ianuarie 25 vs 26 — Evaluare + Reevaluare -->
+      <!-- Martie 25 vs 26 — Evaluare + Reevaluare -->
       <GroupedStackedBarChart
-        title="Ianuarie 2025 vs Ianuarie 2026 — Evaluare + Reevaluare"
-        :modes="evalReevalModes('ian25', 'ian26')"
-        :stacks="evalReevalStacks('Ianuarie 2025', 'Ianuarie 2026', 'ian25', 'ian26')"
-        :data="{ ian25: data.ian25, ian26: data.ian26 }"
+        title="Martie 2025 vs Martie 2026 — Evaluare + Reevaluare"
+        :modes="evalReevalModes('mar25', 'mar26')"
+        :stacks="evalReevalStacks('Martie 2025', 'Martie 2026', 'mar25', 'mar26')"
+        :data="{ mar25: data.mar25, mar26: data.mar26 }"
         y-axis-name="Persoane"
       />
 
-      <!-- Chart 2: Februarie 25 vs 26 — Evaluare + Reevaluare -->
+      <!-- Februarie 25 vs 26 — Evaluare + Reevaluare -->
       <GroupedStackedBarChart
         title="Februarie 2025 vs Februarie 2026 — Evaluare + Reevaluare"
         :modes="evalReevalModes('feb25', 'feb26')"
@@ -101,22 +103,41 @@ const asistentaSeries = (key1, key2) => [
         y-axis-name="Persoane"
       />
 
-      <!-- Chart 3: Asistență Ianuarie 25 vs 26 -->
+      <!-- Ianuarie 25 vs 26 — Evaluare + Reevaluare -->
       <GroupedStackedBarChart
-        title="Asistență Ianuarie 2025 vs Ianuarie 2026"
-        :series="asistentaSeries('ian25', 'ian26')"
-        :stacks="asistentaStacks('Ianuarie 2025', 'Ianuarie 2026', 'ian25', 'ian26')"
+        title="Ianuarie 2025 vs Ianuarie 2026 — Evaluare + Reevaluare"
+        :modes="evalReevalModes('ian25', 'ian26')"
+        :stacks="evalReevalStacks('Ianuarie 2025', 'Ianuarie 2026', 'ian25', 'ian26')"
         :data="{ ian25: data.ian25, ian26: data.ian26 }"
+        y-axis-name="Persoane"
+      />
+
+      <!-- Asistență Martie 25 vs 26 -->
+      <GroupedStackedBarChart
+        title="Asistență Martie 2025 vs Martie 2026"
+        :series="asistentaSeries('mar25', 'mar26')"
+        :stacks="asistentaStacks('Martie 2025', 'Martie 2026', 'mar25', 'mar26')"
+        :data="{ mar25: data.mar25, mar26: data.mar26 }"
         y-axis-name="Unități"
         label-each
       />
 
-      <!-- Chart 4: Asistență Februarie 25 vs 26 -->
+      <!-- Asistență Februarie 25 vs 26 -->
       <GroupedStackedBarChart
         title="Asistență Februarie 2025 vs Februarie 2026"
         :series="asistentaSeries('feb25', 'feb26')"
         :stacks="asistentaStacks('Februarie 2025', 'Februarie 2026', 'feb25', 'feb26')"
         :data="{ feb25: data.feb25, feb26: data.feb26 }"
+        y-axis-name="Unități"
+        label-each
+      />
+
+      <!-- Asistență Ianuarie 25 vs 26 -->
+      <GroupedStackedBarChart
+        title="Asistență Ianuarie 2025 vs Ianuarie 2026"
+        :series="asistentaSeries('ian25', 'ian26')"
+        :stacks="asistentaStacks('Ianuarie 2025', 'Ianuarie 2026', 'ian25', 'ian26')"
+        :data="{ ian25: data.ian25, ian26: data.ian26 }"
         y-axis-name="Unități"
         label-each
       />

@@ -31,7 +31,7 @@ function normalizeRaion(name) {
   return raionNameMap[trimmed] || trimmed
 }
 
-function parseSheet(wb, sheetName) {
+function parseSheet(wb, sheetName, colOffset = 0) {
   const ws = wb.Sheets[sheetName]
   const raw = XLSX.utils.sheet_to_json(ws, { header: 1 })
 
@@ -50,30 +50,39 @@ function parseSheet(wb, sheetName) {
 
     rows.push({
       raion: normalizeRaion(raion),
-      eval_gradinita: Number(r[2]) || 0,
-      eval_scoala: Number(r[3]) || 0,
-      eval_ipt: Number(r[4]) || 0,
-      eval_total: Number(r[5]) || 0,
-      reeval_gradinita: Number(r[6]) || 0,
-      reeval_scoala: Number(r[7]) || 0,
-      reeval_ipt: Number(r[8]) || 0,
-      reeval_total: Number(r[9]) || 0,
-      asistati: Number(r[10]) || 0,
-      sedinte: Number(r[11]) || 0,
+      eval_gradinita: Number(r[2 + colOffset]) || 0,
+      eval_scoala: Number(r[3 + colOffset]) || 0,
+      eval_ipt: Number(r[4 + colOffset]) || 0,
+      eval_total: Number(r[5 + colOffset]) || 0,
+      reeval_gradinita: Number(r[6 + colOffset]) || 0,
+      reeval_scoala: Number(r[7 + colOffset]) || 0,
+      reeval_ipt: Number(r[8 + colOffset]) || 0,
+      reeval_total: Number(r[9 + colOffset]) || 0,
+      asistati: Number(r[10 + colOffset]) || 0,
+      sedinte: Number(r[11 + colOffset]) || 0,
     })
   }
   return rows
 }
 
 export async function loadXlsxData() {
-  const response = await fetch('/diagrame_DMSTAO.xlsx')
-  const buffer = await response.arrayBuffer()
-  const wb = XLSX.read(buffer, { type: 'array' })
+  const [resp1, resp2] = await Promise.all([
+    fetch('/diagrame_DMSTAO.xlsx'),
+    fetch('/Martie25vs26.xlsx'),
+  ])
+  const [buf1, buf2] = await Promise.all([
+    resp1.arrayBuffer(),
+    resp2.arrayBuffer(),
+  ])
+  const wb1 = XLSX.read(buf1, { type: 'array' })
+  const wb2 = XLSX.read(buf2, { type: 'array' })
 
   return {
-    ian25: parseSheet(wb, 'Ian25'),
-    ian26: parseSheet(wb, 'Ian26'),
-    feb25: parseSheet(wb, 'Feb25'),
-    feb26: parseSheet(wb, 'Feb26'),
+    ian25: parseSheet(wb1, 'Ian25'),
+    ian26: parseSheet(wb1, 'Ian26'),
+    feb25: parseSheet(wb1, 'Feb25'),
+    feb26: parseSheet(wb1, 'Feb26'),
+    mar25: parseSheet(wb2, 'martie2025v2'),
+    mar26: parseSheet(wb2, 'martie2026', 1),
   }
 }

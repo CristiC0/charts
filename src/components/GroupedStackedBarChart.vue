@@ -152,7 +152,7 @@ const stackSummaries = computed(() => {
     const stackSeries = activeSeries.value.filter((s) => s.stack === sk)
     const total = stackSeries.reduce((sum, s) => sum + (seriesTotals.value[s.key] || 0), 0)
     const breakdown = stackSeries.map((s) => ({
-      label: s.label.replace(/^(Ianuarie|Februarie)\s+\d{4}\s*/i, ''),
+      label: s.label.replace(/^(Ianuarie|Februarie|Martie)\s+\d{4}\s*/i, ''),
       value: seriesTotals.value[s.key] || 0,
       color: s.color,
     }))
